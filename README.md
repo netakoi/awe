@@ -95,6 +95,10 @@ mamba env create -f diffusion_policy/conda_environment.yaml
 python diffusion_policy/train.py --config-dir=config --config-name=waypoint_image_[TASK]_ph_diffusion_policy_transformer.yaml hydra.run.dir='data/outputs/${now:%Y.%m.%d}/${now:%H.%M.%S}_${name}_${task_name}'
 ```
 
+```
+python diffusion_policy/train.py --config-dir=config --config-name=waypoint_image_can_ph_diffusion_policy_transformer.yaml hydra.run.dir='data/outputs/${now:%Y.%m.%d}/${now:%H.%M.%S}_${name}_${task_name}'
+```
+
 ## Bimanual Simulation Suite
 ### Set up the environment
 ```bash

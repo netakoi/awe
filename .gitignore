@@ -132,6 +132,7 @@ dmypy.json
 robomimic/datasets
 data/
 *.zip
+outputs/
 
 # misc
 mujoco-py
