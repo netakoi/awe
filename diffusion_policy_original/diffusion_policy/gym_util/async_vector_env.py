@@ -39,6 +39,7 @@ class AsyncState(Enum):
     WAITING_STEP = "step"
     WAITING_CALL = "call"
 
+
 class AsyncVectorEnv(VectorEnv):
     """Vectorized environment that runs multiple environments in parallel. It
     uses `multiprocessing` processes, and pipes for communication.
@@ -75,6 +76,7 @@ class AsyncVectorEnv(VectorEnv):
         if you are writing your own worker, it is recommended to start from the code
         for `_worker` (or `_worker_shared_memory`) method below, and add changes
     """
+
     def __init__(
         self,
         env_fns,
@@ -184,21 +186,7 @@ class AsyncVectorEnv(VectorEnv):
         _, successes = zip(*[pipe.recv() for pipe in self.parent_pipes])
         self._raise_if_errors(successes)
 
-    # def reset_async(self):
-    #     self._assert_is_running()
-    #     if self._state != AsyncState.DEFAULT:
-    #         raise AlreadyPendingCallError(
-    #             "Calling `reset_async` while waiting "
-    #             "for a pending call to `{0}` to complete".format(self._state.value),
-    #             self._state.value,
-    #         )
-
-    #     for pipe in self.parent_pipes:
-    #         pipe.send(("reset", None))
-    #     self._state = AsyncState.WAITING_RESET
-
-    def reset_async(self, seed=None, options=None):
-        del seed, options
+    def reset_async(self):
         self._assert_is_running()
         if self._state != AsyncState.DEFAULT:
             raise AlreadyPendingCallError(
@@ -209,16 +197,9 @@ class AsyncVectorEnv(VectorEnv):
 
         for pipe in self.parent_pipes:
             pipe.send(("reset", None))
-        # self._state = 'resetting'
         self._state = AsyncState.WAITING_RESET
 
-    def reset(self, *, seed=None, options=None):
-        self.reset_async(seed=seed, options=options)
-        return self.reset_wait(seed=seed, options=options)
-
-
-    def reset_wait(self, timeout=None, seed=None, options=None):
-    # def reset_wait(self, timeout=None):
+    def reset_wait(self, timeout=None):
         """
         Parameters
         ----------
@@ -418,7 +399,7 @@ class AsyncVectorEnv(VectorEnv):
 
         logger.error("Raising the last exception back to the main process.")
         raise exctype(value)
-
+    
     def call_async(self, name: str, *args, **kwargs):
         """Calls the method with name asynchronously and apply args and kwargs to the method.
 
@@ -443,7 +424,7 @@ class AsyncVectorEnv(VectorEnv):
             pipe.send(("_call", (name, args, kwargs)))
         self._state = AsyncState.WAITING_CALL
 
-    def call_wait(self, timeout=None) -> list:
+    def call_wait(self, timeout = None) -> list:
         """Calls all parent pipes and waits for the results.
 
         Args:
@@ -489,10 +470,12 @@ class AsyncVectorEnv(VectorEnv):
         """
         self.call_async(name, *args, **kwargs)
         return self.call_wait()
+    
 
-    def call_each(
-        self, name: str, args_list: list = None, kwargs_list: list = None, timeout=None
-    ):
+    def call_each(self, name: str, 
+            args_list: list=None, 
+            kwargs_list: list=None, 
+            timeout = None):
         n_envs = len(self.parent_pipes)
         if args_list is None:
             args_list = [[]] * n_envs
@@ -535,6 +518,7 @@ class AsyncVectorEnv(VectorEnv):
 
         return results
 
+
     def set_attr(self, name: str, values):
         """Sets an attribute of the sub-environments.
 
@@ -571,7 +555,8 @@ class AsyncVectorEnv(VectorEnv):
         self._raise_if_errors(successes)
 
     def render(self, *args, **kwargs):
-        return self.call("render", *args, **kwargs)
+        return self.call('render', *args, **kwargs)
+
 
 
 def _worker(index, env_fn, pipe, parent_pipe, shared_memory, error_queue):

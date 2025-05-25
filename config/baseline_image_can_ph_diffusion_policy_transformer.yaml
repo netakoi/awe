@@ -182,6 +182,8 @@ task:
   dataset_type: ph
   env_runner:
     _target_: diffusion_policy.env_runner.robomimic_image_runner.RobomimicImageRunner
+    # args:
+    #   shared_memory: false # added by me
     abs_action: true
     crf: 22
     dataset_path: data/robomimic/datasets/can/ph/image_abs.hdf5
